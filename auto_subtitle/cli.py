@@ -22,37 +22,43 @@ def main():
     parser.add_argument("--task", type=str, default="transcribe", choices=[
                         "transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
 
+    parser.add_argument("--only_srt", default=False, action='store_true',
+                        help="only a srt file is generated and not a subtitled video")
+
     args = parser.parse_args().__dict__
     model_name: str = args.pop("model")
     output_dir: str = args.pop("output_dir")
+    only_srt: bool = args.pop("only_srt")
+
     os.makedirs(output_dir, exist_ok=True)
 
     if model_name.endswith(".en"):
-        warnings.warn(
-            f"{model_name} is an English-only model, forcing English detection.")
+        warnings.warn(f"{model_name} is an English-only model, forcing English detection.")
         args["language"] = "en"
 
     model = whisper.load_model(model_name)
     audios = get_audio(args.pop("video"))
     subtitles = get_subtitles(
-        audios, lambda audio_path: model.transcribe(audio_path, **args)
+        audios, lambda audio_path: model.transcribe(
+            audio_path, **args), only_srt, output_dir
     )
     # bash command to download a youtube video with `youtube-dl` and save it as `video.mp4`:
     # youtube-dl -f 22 -o video.mp4 https://www.youtube.com/watch?v=QH2-TGUlwu4
 
-    for path, srt_path in subtitles.items():
-        out_path = os.path.join(output_dir, f"{filename(path)}.mp4")
+    if not only_srt:
+        for path, srt_path in subtitles.items():
+            out_path = os.path.join(output_dir, f"{filename(path)}.mp4")
 
-        print(f"Adding subtitles to {filename(path)}...")
+            print(f"Adding subtitles to {filename(path)}...")
 
-        video = ffmpeg.input(path)
-        audio = video.audio
+            video = ffmpeg.input(path)
+            audio = video.audio
 
-        stderr = ffmpeg.concat(
-            video.filter('subtitles', srt_path, force_style="OutlineColour=&H40000000,BorderStyle=3"), audio, v=1, a=1
-        ).output(out_path).run(quiet=True, overwrite_output=True)
+            stderr = ffmpeg.concat(
+                video.filter('subtitles', srt_path, force_style="OutlineColour=&H40000000,BorderStyle=3"), audio, v=1, a=1
+            ).output(out_path).run(quiet=True, overwrite_output=True)
 
-        print(f"Saved subtitled video to {os.path.abspath(out_path)}.")
+            print(f"Saved subtitled video to {os.path.abspath(out_path)}.")
 
 
 def get_audio(paths):
@@ -74,12 +80,16 @@ def get_audio(paths):
     return audio_paths
 
 
-def get_subtitles(audio_paths: list, transcribe: callable):
-    temp_dir = tempfile.gettempdir()
+def get_subtitles(audio_paths: list, transcribe: callable, only_srt: bool, output_dir: str):
+    if only_srt:
+        dir = output_dir
+    else:
+        dir = tempfile.gettempdir()
+
     subtitles_path = {}
 
     for path, audio_path in audio_paths.items():
-        srt_path = os.path.join(temp_dir, f"{filename(path)}.srt")
+        srt_path = os.path.join(dir, f"{filename(path)}.srt")
 
         print(
             f"Generating subtitles for {filename(path)}... This might take a while."
@@ -93,6 +103,8 @@ def get_subtitles(audio_paths: list, transcribe: callable):
             write_srt(result["segments"], file=srt)
 
         subtitles_path[path] = srt_path
+    if only_srt:
+        print(f"Saved subtitle file to {os.path.abspath(srt_path)}.")
 
     return subtitles_path
 
