@@ -85,11 +85,11 @@ def get_audio(paths):
 
 
 def get_subtitles(audio_paths: list, output_srt: bool, output_dir: str, transcribe: callable):
-    srt_path = output_dir if output_srt else tempfile.gettempdir()
+    srt_dir = output_dir if output_srt else tempfile.gettempdir()
     subtitles_path = {}
 
     for path, audio_path in audio_paths.items():
-        srt_path = os.path.join(srt_path, f"{filename(path)}.srt")
+        srt_path = os.path.join(srt_dir, f"{filename(path)}.srt")
 
         print(
             f"Generating subtitles for {filename(path)}... This might take a while."
