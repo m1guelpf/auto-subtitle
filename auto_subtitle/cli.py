@@ -37,23 +37,25 @@ def main():
     language: str = args.pop("language")
     os.makedirs(output_dir, exist_ok=True)
 
-    if language not in LANGUAGES:
-      raise Exception(f'whisper: error: argument --language: invalid choice: {language} (choose from {list(LANGUAGES.keys())}) {list(LANGUAGES.values())}')
+    if language is not None:
+        if language not in LANGUAGES:
+            raise Exception(
+                f'whisper: error: argument --language: invalid choice: {language} (choose from {list(LANGUAGES.keys())}) {list(LANGUAGES.values())}')
+        else:
+            warnings.warn(
+                f"You have forced the use of the {language} language.")
+            args["language"] = language
 
     if model_name.endswith(".en"):
         warnings.warn(
             f"{model_name} is an English-only model, forcing English detection.")
         args["language"] = "en"
 
-    elif language is not None:
-        warnings.warn(
-            f"You have forced the use of the {language} language.")
-        args["language"] = language
-
     model = whisper.load_model(model_name)
     audios = get_audio(args.pop("video"))
     subtitles = get_subtitles(
-        audios, output_srt or srt_only, output_dir, lambda audio_path: model.transcribe(audio_path, **args)
+        audios, output_srt or srt_only, output_dir, lambda audio_path: model.transcribe(
+            audio_path, **args)
     )
 
     if srt_only:
