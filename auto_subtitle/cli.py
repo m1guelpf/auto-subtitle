@@ -103,6 +103,7 @@ def get_subtitles(audio_paths: list, output_srt: bool, output_dir: str, transcri
             write_srt(result["segments"], file=srt)
 
         subtitles_path[path] = srt_path
+        os.remove(audio_path)
 
     return subtitles_path
 
