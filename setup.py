@@ -1,6 +1,3 @@
-import os
-
-import pkg_resources
 from setuptools import setup, find_packages
 
 setup(
@@ -10,8 +7,7 @@ setup(
     py_modules=["auto_subtitle"],
     author="Miguel Piedrafita",
     install_requires=[
-        'youtube-dl',
-        'whisper @ git+https://github.com/openai/whisper.git@main#egg=whisper'
+        'openai-whisper',
     ],
     description="Automatically generate and embed subtitles into your videos",
     entry_points={
