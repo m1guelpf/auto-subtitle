@@ -4,6 +4,7 @@ import whisper
 import argparse
 import warnings
 import tempfile
+import subprocess
 from .utils import filename, str2bool, write_srt
 
 
@@ -71,10 +72,9 @@ def get_audio(paths):
         print(f"Extracting audio from {filename(path)}...")
         output_path = os.path.join(temp_dir, f"{filename(path)}.wav")
 
-        ffmpeg.input(path).output(
-            output_path,
-            acodec="pcm_s16le", ac=1, ar="16k"
-        ).run(quiet=True, overwrite_output=True)
+        # Use subprocess instead of the ffmpeg module due to conflicting argument name "async"
+        if subprocess.run(['ffmpeg', '-y', '-i', path, '-acodec', 'pcm_s16le', '-ac', '1', '-async', '1', output_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode > 0:
+            raise Exception(f'Error occurred while extracting audio from {filename(path)}')
 
         audio_paths[path] = output_path
 
