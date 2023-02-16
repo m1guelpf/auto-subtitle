@@ -1,4 +1,5 @@
 import os
+import glob
 import ffmpeg
 import whisper
 import argparse
@@ -11,8 +12,8 @@ from .utils import filename, str2bool, write_srt
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("video", nargs="+", type=str,
-                        help="paths to video files to transcribe")
+    parser.add_argument("videos", nargs="+", type=str,
+                        help="paths/wildcards to video files to transcribe")
     parser.add_argument("--model", default="small",
                         choices=whisper.available_models(), help="name of the Whisper model to use")
     parser.add_argument("--output_dir", "-o", type=str,
@@ -34,13 +35,29 @@ def main():
     srt_only: bool = args.pop("srt_only")
     os.makedirs(output_dir, exist_ok=True)
 
+    # Process wildcards
+    videos = []
+    for video in args['videos']:
+        videos += list(glob.glob(video))
+    n = len(videos)
+    if n == 0:
+        print('Video file not found.')
+        return
+    elif n > 1:
+        print('List of videos:')
+        for i, file in enumerate(videos):
+            print(f'  {i+1}. {file}')
+    args.pop('videos')
+
+    # Load models
     if model_name.endswith(".en"):
         warnings.warn(
             f"{model_name} is an English-only model, forcing English detection.")
         args["language"] = "en"
 
     model = whisper.load_model(model_name)
-    audios = get_audio(args.pop("video"))
+
+    audios = get_audio(videos)
     subtitles = get_subtitles(
         audios, output_srt or srt_only, output_dir, lambda audio_path: model.transcribe(audio_path, **args)
     )
