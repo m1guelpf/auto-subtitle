@@ -1,56 +1,64 @@
 import os
 import glob
+import psutil
 import ffmpeg
 import whisper
 import argparse
 import warnings
 import tempfile
 import subprocess
-from .utils import filename, str2bool, write_srt
+import multiprocessing
+from torch.cuda import is_available
+from .utils import filename, write_srt, is_audio, ffmpeg_extract_audio
 
 
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("videos", nargs="+", type=str,
+    parser.add_argument("paths", nargs="+", type=str,
                         help="paths/wildcards to video files to transcribe")
     parser.add_argument("--model", default="small",
                         choices=whisper.available_models(), help="name of the Whisper model to use")
-    parser.add_argument("--output_dir", "-o", type=str,
+    parser.add_argument("--output-dir", "-o", type=str,
                         default=".", help="directory to save the outputs")
-    parser.add_argument("--output_srt", type=str2bool, default=False,
+    parser.add_argument("--output-srt", action='store_true', default=False, 
                         help="whether to output the .srt file along with the video files")
-    parser.add_argument("--srt_only", type=str2bool, default=False,
+    parser.add_argument("--srt-only", action='store_true', default=False, 
                         help="only generate the .srt file and not create overlayed video")
-    parser.add_argument("--verbose", type=str2bool, default=False,
+    parser.add_argument("--extract-workers", type=int, default=psutil.cpu_count(logical=False),
+                        help="number of workers to extract audio (only useful when there are multiple videos)")
+    parser.add_argument("--verbose", action='store_true', default=False, 
                         help="whether to print out the progress and debug messages")
 
     parser.add_argument("--task", type=str, default="transcribe", choices=[
                         "transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
     parser.add_argument("--language", type=str, default=None, 
-                    choices=sorted(whisper.tokenizer.LANGUAGES.keys()) + sorted([k.title() for k in whisper.tokenizer.TO_LANGUAGE_CODE.keys()]), 
-                    help="language spoken in the audio, specify None to perform language detection")
+                        choices=sorted(whisper.tokenizer.LANGUAGES.keys()) + sorted([k.title() for k in whisper.tokenizer.TO_LANGUAGE_CODE.keys()]), 
+                        help="language spoken in the audio, specify None to perform language detection")
+    parser.add_argument("--device", default="cuda" if is_available() else "cpu", help="device to use for PyTorch inference")
 
     args = parser.parse_args().__dict__
     model_name: str = args.pop("model")
     output_dir: str = args.pop("output_dir")
     output_srt: bool = args.pop("output_srt")
     srt_only: bool = args.pop("srt_only")
+    device: str = args.pop("device")
+    extract_wokers: str = args.pop('extract_workers')
     os.makedirs(output_dir, exist_ok=True)
 
     # Process wildcards
-    videos = []
-    for video in args['videos']:
-        videos += list(glob.glob(video))
-    n = len(videos)
+    paths = []
+    for path in args['paths']:
+        paths += list(glob.glob(path))
+    n = len(paths)
     if n == 0:
         print('Video file not found.')
         return
     elif n > 1:
         print('List of videos:')
-        for i, file in enumerate(videos):
-            print(f'  {i+1}. {file}')
-    args.pop('videos')
+        for i, path in enumerate(paths):
+            print(f'  {i+1}. {path}')
+    args.pop('paths')
 
     # Load models
     if model_name.endswith(".en"):
@@ -58,17 +66,25 @@ def main():
             f"{model_name} is an English-only model, forcing English detection.")
         args["language"] = "en"
 
-    model = whisper.load_model(model_name)
+    model = whisper.load_model(model_name, device=device)
 
-    audios = get_audio(videos)
+    # Extract audio from video. Skip if it is already an audio file
+    audios = get_audio(paths, extract_wokers)
+
+    # Generate subtitles with whisper
     subtitles = get_subtitles(
-        audios, output_srt or srt_only, output_dir, lambda audio_path: model.transcribe(audio_path, **args)
+        audios, output_srt or srt_only, output_dir, 
+        lambda audio_path: model.transcribe(audio_path, condition_on_previous_text=False, **args)
     )
 
     if srt_only:
         return
 
     for path, srt_path in subtitles.items():
+        # Skip audio files
+        if is_audio(path):
+            continue
+        
         out_path = os.path.join(output_dir, f"{filename(path)}.mp4")
 
         print(f"Adding subtitles to {filename(path)}...")
@@ -83,20 +99,24 @@ def main():
         print(f"Saved subtitled video to {os.path.abspath(out_path)}.")
 
 
-def get_audio(paths):
+def get_audio(paths, num_workers=1):
     temp_dir = tempfile.gettempdir()
-
     audio_paths = {}
+    func_args = []
 
     for path in paths:
-        print(f"Extracting audio from {filename(path)}...")
-        output_path = os.path.join(temp_dir, f"{filename(path)}.mp3")
-
-        # Use subprocess instead of the ffmpeg module due to conflicting argument name "async"
-        if subprocess.run(['ffmpeg', '-y', '-i', path, '-ac', '1', '-async', '1', output_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode > 0:
-            raise Exception(f'Error occurred while extracting audio from {filename(path)}')
-
+        if is_audio(path):
+            # Skip audio files
+            output_path = path
+        else:
+            output_path = os.path.join(temp_dir, f"{filename(path)}.mp3")
+            func_args.append((path, output_path))
+            
         audio_paths[path] = output_path
+    
+    # Execute on multiple processes
+    pool = multiprocessing.Pool(num_workers)
+    pool.starmap(ffmpeg_extract_audio, func_args)
 
     return audio_paths
 
