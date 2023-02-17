@@ -27,6 +27,9 @@ def main():
 
     parser.add_argument("--task", type=str, default="transcribe", choices=[
                         "transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
+    parser.add_argument("--language", type=str, default=None, 
+                    choices=sorted(whisper.tokenizer.LANGUAGES.keys()) + sorted([k.title() for k in whisper.tokenizer.TO_LANGUAGE_CODE.keys()]), 
+                    help="language spoken in the audio, specify None to perform language detection")
 
     args = parser.parse_args().__dict__
     model_name: str = args.pop("model")
@@ -87,10 +90,10 @@ def get_audio(paths):
 
     for path in paths:
         print(f"Extracting audio from {filename(path)}...")
-        output_path = os.path.join(temp_dir, f"{filename(path)}.wav")
+        output_path = os.path.join(temp_dir, f"{filename(path)}.mp3")
 
         # Use subprocess instead of the ffmpeg module due to conflicting argument name "async"
-        if subprocess.run(['ffmpeg', '-y', '-i', path, '-acodec', 'pcm_s16le', '-ac', '1', '-async', '1', output_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode > 0:
+        if subprocess.run(['ffmpeg', '-y', '-i', path, '-ac', '1', '-async', '1', output_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode > 0:
             raise Exception(f'Error occurred while extracting audio from {filename(path)}')
 
         audio_paths[path] = output_path
