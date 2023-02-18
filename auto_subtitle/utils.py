@@ -43,7 +43,7 @@ def write_srt(transcript: Iterator[dict], file: TextIO):
         )
 
 
-def filename(path):
+def get_filename(path):
     return os.path.splitext(os.path.basename(path))[0]
 
 
@@ -52,6 +52,6 @@ def is_audio(path):
 
 
 def ffmpeg_extract_audio(input_path, output_path):
-    print(f"Extracting audio from {filename(input_path)}...")
+    print(f"Extracting audio from {input_path}...")
     if subprocess.run(('ffmpeg', '-y', '-i', input_path, '-ac', '1', '-async', '1', output_path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode > 0:
-        raise Exception(f'Error occurred while extracting audio from {filename(input_path)}')
+        raise Exception(f'Error occurred while extracting audio from {input_path}')

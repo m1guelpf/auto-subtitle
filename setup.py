@@ -8,6 +8,7 @@ setup(
     author="Miguel Piedrafita, Bohui WU",
     install_requires=[
         'openai-whisper',
+        'psutil'
     ],
     description="Automatically generate and/or embed subtitles into your videos",
     entry_points={

@@ -9,7 +9,7 @@ import tempfile
 import subprocess
 import multiprocessing
 from torch.cuda import is_available
-from .utils import filename, write_srt, is_audio, ffmpeg_extract_audio
+from .utils import get_filename, write_srt, is_audio, ffmpeg_extract_audio
 
 
 def main():
@@ -21,14 +21,18 @@ def main():
                         choices=whisper.available_models(), help="name of the Whisper model to use")
     parser.add_argument("--output-dir", "-o", type=str,
                         default=".", help="directory to save the outputs")
-    parser.add_argument("--output-srt", action='store_true', default=False, 
-                        help="whether to output the .srt file along with the video files")
-    parser.add_argument("--srt-only", action='store_true', default=False, 
-                        help="only generate the .srt file and not create overlayed video")
-    parser.add_argument("--extract-workers", type=int, default=psutil.cpu_count(logical=False),
+    parser.add_argument("--output-srt", "-s", action='store_true', default=False, 
+                        help="output the .srt file in the output directory")
+    parser.add_argument("--output-audio", "-a", action='store_true', default=False, 
+                        help="output the audio extracted")
+    parser.add_argument("--output-video", "-v", action='store_true', default=False, 
+                        help="generate video with embedded subtitles")
+    parser.add_argument("--enhance-consistency", action='store_true', default=False, 
+                        help="use the previous output as input to the next window to improve consistency (may stuck in a failure loop)")
+    parser.add_argument("--extract-workers", type=int, default=max(1, psutil.cpu_count(logical=False) // 2),
                         help="number of workers to extract audio (only useful when there are multiple videos)")
     parser.add_argument("--verbose", action='store_true', default=False, 
-                        help="whether to print out the progress and debug messages")
+                        help="print out the progress and debug messages")
 
     parser.add_argument("--task", type=str, default="transcribe", choices=[
                         "transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
@@ -41,10 +45,16 @@ def main():
     model_name: str = args.pop("model")
     output_dir: str = args.pop("output_dir")
     output_srt: bool = args.pop("output_srt")
-    srt_only: bool = args.pop("srt_only")
+    output_video: bool = args.pop("output_video")
+    output_audio: bool = args.pop("output_audio")
     device: str = args.pop("device")
-    extract_wokers: str = args.pop('extract_workers')
+    extract_wokers: str = args.pop("extract_workers")
+    enhace_consistency: bool = args.pop("enhance_consistency")
     os.makedirs(output_dir, exist_ok=True)
+
+    # Default output_srt to True if output_video is False
+    if not output_video and not output_srt:
+        output_srt = True
 
     # Process wildcards
     paths = []
@@ -69,15 +79,15 @@ def main():
     model = whisper.load_model(model_name, device=device)
 
     # Extract audio from video. Skip if it is already an audio file
-    audios = get_audio(paths, extract_wokers)
+    audios = get_audio(paths, output_audio, output_dir, extract_wokers)
 
     # Generate subtitles with whisper
     subtitles = get_subtitles(
-        audios, output_srt or srt_only, output_dir, 
-        lambda audio_path: model.transcribe(audio_path, condition_on_previous_text=False, **args)
+        audios, output_srt, output_dir, 
+        lambda audio_path: model.transcribe(audio_path, condition_on_previous_text=enhace_consistency, **args)
     )
 
-    if srt_only:
+    if not output_video:
         return
 
     for path, srt_path in subtitles.items():
@@ -85,21 +95,24 @@ def main():
         if is_audio(path):
             continue
         
-        out_path = os.path.join(output_dir, f"{filename(path)}.mp4")
-
-        print(f"Adding subtitles to {filename(path)}...")
+        print(f"Adding subtitles to {path}...")
+        
+        out_path = os.path.join(output_dir, f"{get_filename(path)}.mp4")
+        if os.path.exists(out_path) and os.path.samefile(path, out_path):
+            out_path = os.path.join(output_dir, f"{get_filename(path)}-subtitled.mp4")
+            warnings.warn(f"{path} will overwrite the original file. Renaming the output file to {out_path}")
 
         video = ffmpeg.input(path)
         audio = video.audio
 
         ffmpeg.concat(
             video.filter('subtitles', srt_path, force_style="OutlineColour=&H40000000,BorderStyle=3"), audio, v=1, a=1
-        ).output(out_path).run(quiet=True, overwrite_output=True)
+        ).output(out_path).run(quiet=False, overwrite_output=True)
 
         print(f"Saved subtitled video to {os.path.abspath(out_path)}.")
 
 
-def get_audio(paths, num_workers=1):
+def get_audio(paths, output_audio, output_dir, num_workers=1):
     temp_dir = tempfile.gettempdir()
     audio_paths = {}
     func_args = []
@@ -109,7 +122,8 @@ def get_audio(paths, num_workers=1):
             # Skip audio files
             output_path = path
         else:
-            output_path = os.path.join(temp_dir, f"{filename(path)}.mp3")
+            output_path = output_dir if output_audio else tempfile.gettempdir()
+            output_path = os.path.join(output_path, f"{get_filename(path)}.mp3")
             func_args.append((path, output_path))
             
         audio_paths[path] = output_path
@@ -126,10 +140,10 @@ def get_subtitles(audio_paths: list, output_srt: bool, output_dir: str, transcri
 
     for path, audio_path in audio_paths.items():
         srt_path = output_dir if output_srt else tempfile.gettempdir()
-        srt_path = os.path.join(srt_path, f"{filename(path)}.srt")
+        srt_path = os.path.join(srt_path, f"{get_filename(path)}.srt")
         
         print(
-            f"Generating subtitles for {filename(path)}... This might take a while."
+            f"Generating subtitles for {path}... This might take a while."
         )
 
         warnings.filterwarnings("ignore")
