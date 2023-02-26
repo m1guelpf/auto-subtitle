@@ -215,6 +215,8 @@ Afrikaans
 	- Yiddish
 	- Yorubaa
 
+
+Further details on accuracy and models can be obtained here: https://github.com/openai/whisper#available-models-and-languages
 --------------------------------------------------------------------------
 
 You can optionally use a bigger model for better results (especially with other languages). The available models are `tiny`, `tiny.en`, `base`, `base.en`, `small`, `small.en`, `medium`, `medium.en`, `large`.
