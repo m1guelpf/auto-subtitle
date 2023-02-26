@@ -1,6 +1,8 @@
-## Forked from https://github.com/m1guelpf/auto-subtitle
+## Automatic subtitles for your videos
 
+    This repository uses `ffmpeg` and [OpenAI's Whisper](https://openai.com/blog/whisper) to automatically generate and overlay subtitles on any video.
     Bigup to m1guelpf for releasing this tool
+    Kudos for all the improvements made by RapDoodle
 
 ## Why forking it 
 
@@ -13,20 +15,23 @@
 ## Advantages of this version (so far)
 
     - Can force subtitles to be generated in spanish
-
     - Updated dependencies
+    - Fix audio out of sync issue
+    - Wildcard support for filenames
+    - Convert audio to subtitles (output `.srt` files)
+    - Option to pick a language instead of using language auto detection
+    - Extract audio from videos in parallel
+    - Disable `condition_on_previous_text` by default to avoid stucking in failure loop (especially for videos with long intervals between talks), with option `--enhance-consistency` to enable it.
+    - Many more new command options
 
-
-
-## Automatic subtitles in your videos
-
-This repository uses `ffmpeg` and [OpenAI's Whisper](https://openai.com/blog/whisper) to automatically generate and overlay subtitles on any video.
 
 ## Installation
 
 To get started, you'll need Python 3.7 or newer. Install the binary by running the following command:
 
-    pip install git+https://github.com/Sectumsempra82/auto-subtitle-plus.git
+```bash
+    pip install git+https://github.com/Sectumsempra82/auto-subtitle-plus.gi
+```
 
 You'll also need to install [`ffmpeg`](https://ffmpeg.org/), which is available from most package managers:
 
@@ -67,13 +72,18 @@ Follow thsese instructions only if your gpu is powerful enough to be worth switc
 
 `--task` - whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate') - OPTIONS: `transcribe`, `translate` - DEFAULT: `transcribe`
 
+... and many more
 
 
 ## Usage
 
 The following command will generate a `subtitled/video.mp4` file contained the input video with overlayed subtitles.
 
-    auto_subtitle_plus.exe /path/to/video.mp4 -o subtitled/
+    auto_subtitle_plus /path/to/video.mp4 --output-video -o subtitled/
+
+Convert all `mp4` videos in the current directory to `.srt` subtitles and store it in the current directory
+
+    auto_subtitle_plus *.mp4 --output-srt
 
 ---------------------- Recommended----------------
 
