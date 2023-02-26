@@ -89,7 +89,7 @@ Convert all `mp4` videos in the current directory to `.srt` subtitles and store 
 
 The following command will only generate an `.srt` file next to your video
 
-    auto_subtitle.exe '..\The Big Bang Theory 16.avi' --model medium --output_srt True --srt_only True
+    auto_subtitle_plus.exe 'video.avi' --model medium --output-srt
 
 --------------------------------------------------
 
@@ -97,13 +97,15 @@ The default setting (which selects the `small` model) works well for transcribin
 
 --------------- NEW ------------------------------------------------------
 
-You can use the --language parameter to force english or spanish output
+You can use the --language parameter to force the output for the following languages:
+
+Afrikaans,Albanian,Amharic,Arabic,Armenian,Assamese,Azerbaijani,Bashkir,Basque,Belarusian,Bengali,Bosnian,Breton,Bulgarian,Burmese,Castilian,Catalan,Chinese,Croatian,Czech,Danish,Dutch,English,Estonian,Faroese,Finnish,Flemish,French,Galician,Georgian,German,Greek,Gujarati,Haitian,Haitian Creole,Hausa,Hawaiian,Hebrew,Hindi,Hungarian,Icelandic,Indonesian,Italian,Japanese,Javanese,Kannada,Kazakh,Khmer,Korean,Lao,Latin,Latvian,Letzeburgesch,Lingala,Lithuanian,Luxembourgish,Macedonian,Malagasy,Malay,Malayalam,Maltese,Maori,Marathi,Moldavian,Moldovan,Mongolian,Myanmar,Nepali,Norwegian,Nynorsk,Occitan,Panjabi,Pashto,Persian,Polish,Portuguese,Punjabi,Pushto,Romanian,Russian,Sanskrit,Serbian,Shona,Sindhi,Sinhala,Sinhalese,Slovak,Slovenian,Somali,Spanish,Sundanese,Swahili,Swedish,Tagalog,Tajik,Tamil,Tatar,Telugu,Thai,Tibetan,Turkish,Turkmen,Ukrainian,Urdu,Uzbek,Valencian,Vietnamese,Welsh,Yiddish,Yoruba
 
 --------------------------------------------------------------------------
 
 You can optionally use a bigger model for better results (especially with other languages). The available models are `tiny`, `tiny.en`, `base`, `base.en`, `small`, `small.en`, `medium`, `medium.en`, `large`.
 
-    auto_subtitle_plus.exe /path/to/video.mp4 --model medium
+    auto_subtitle_plus.exe /path/to/video.mp4 --model medium 
 
 Adding `--task translate` will translate the subtitles into English:
 
