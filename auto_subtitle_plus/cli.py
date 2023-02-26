@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--model", default="small",
                         choices=whisper.available_models(), help="name of the Whisper model to use")
     parser.add_argument("--language", choices=["en", "es", "auto"], type=str, default=["auto"],
-                        help="force language to the chosen one: en or es, else autodetect")
+                        help="force language to the chosen one: en or es, default: auto")
     parser.add_argument("--output_dir", "-o", type=str,
                         default=".", help="directory to save the outputs")
     parser.add_argument("--output_srt", type=str2bool, default=False,
