@@ -14,6 +14,8 @@ def main():
                         help="paths to video files to transcribe")
     parser.add_argument("--model", default="small",
                         choices=whisper.available_models(), help="name of the Whisper model to use")
+    parser.add_argument("--language", choices=["en", "es", "auto"], type=str, default=["auto"],
+                        help="force language to the chosen one: en or es, else autodetect")
     parser.add_argument("--output_dir", "-o", type=str,
                         default=".", help="directory to save the outputs")
     parser.add_argument("--output_srt", type=str2bool, default=False,
@@ -33,9 +35,9 @@ def main():
     srt_only: bool = args.pop("srt_only")
     os.makedirs(output_dir, exist_ok=True)
 
-    if model_name.endswith(".en"):
+    if args["language"] == "auto" or args["language"] == "" or args["language"] == None or model_name.endswith(".en"):
         warnings.warn(
-            f"{model_name} is an English-only model, forcing English detection.")
+            "forcing English detection")
         args["language"] = "en"
 
     model = whisper.load_model(model_name)
