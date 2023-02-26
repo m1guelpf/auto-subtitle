@@ -6,6 +6,10 @@
 
     Because it needed some fixes, installer, dependencies.... and I wanted also to make it more flexible
 
+    The first iteration of this tool consistently failed generating spanish subtitles in movies that start with english songs,
+
+    even though all the movie is in spanish... this should ifx it by manually forcing the language in the parameters.
+
 ## Advantages of this version (so far)
 
     - Can force subtitles to be generated in spanish
