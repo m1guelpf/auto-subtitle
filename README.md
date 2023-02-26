@@ -58,7 +58,7 @@ Follow thsese instructions only if your gpu is powerful enough to be worth switc
     
     Having a decent gpu can drammatically increase the performance
     
-    ![image](https://user-images.githubusercontent.com/19196549/221421292-fc09b38e-c3aa-46e3-8684-e46c1e4cc691.png)
+![image](https://user-images.githubusercontent.com/19196549/221421292-fc09b38e-c3aa-46e3-8684-e46c1e4cc691.png)
 	
 
 ## Options
