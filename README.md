@@ -49,19 +49,19 @@ Follow thsese instructions only if your gpu is powerful enough to be worth switc
 
 ## Options
 
---model - name of the Whisper model to use, the larger the better and slower - OPTIONS: `tiny`, `tiny.en`, `base`, `base.en`, `small`, `small.en`, `medium`, `medium.en`, `large`
+`--model` - name of the Whisper model to use, the larger the better and slower - OPTIONS: `tiny`, `tiny.en`, `base`, `base.en`, `small`, `small.en`, `medium`, `medium.en`, `large`
 
---language - used to force the subtitle output language - OPTIONS: `en`, `es`, `auto` - DEFAULT: `auto`
+`--language` - used to force the subtitle output language - OPTIONS: `en`, `es`, `auto` - DEFAULT: `auto`
 
---output_dir - directory to save the outputs
+`--output_dir` - directory to save the outputs
 
---output_srt - whether to output the .srt file along with the video files - OPTIONS: True, False - DEFAULT: False
+`--output_srt` - whether to output the .srt file along with the video files - OPTIONS: `True`, `False` - DEFAULT: `False`
 
---srt_only - only generate the .srt file and not create overlayed video - OPTIONS: True, False - DEFAULT: `False`
+`--srt_only` - only generate the .srt file and not create overlayed video - OPTIONS: `True`, `False` - DEFAULT: `False`
 
---verbose - whether to print out the progress and debug messages - OPTIONS: True, False - DEFAULT: `False`
+`--verbose` - whether to print out the progress and debug messages - OPTIONS: `True`, `False` - DEFAULT: `False`
 
---task - whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate') - OPTIONS: `transcribe`, `translate` - DEFAULT: `transcribe`
+`--task` - whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate') - OPTIONS: `transcribe`, `translate` - DEFAULT: `transcribe`
 
 
 
