@@ -4,7 +4,7 @@ import whisper
 import argparse
 import warnings
 import tempfile
-from .utils import filename, str2bool, write_srt
+from .utils import filename, write_srt
 
 
 def main():
