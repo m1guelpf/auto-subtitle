@@ -20,6 +20,19 @@ brew install ffmpeg
 # on Windows using Chocolatey (https://chocolatey.org/)
 choco install ffmpeg
 ```
+### Using python  virtual environments
+Remember to use python virtual environments to install the dependencies to isolate your project.
+
+```bash
+# You can change the name of "auto_subtitle" to whatever you want
+python3 -m venv auto_subtitle
+
+# Activation of Virtual Environment
+source auto_subtitle/bin/activate
+
+# Deactivation
+deactivate
+```
 
 ## Usage
 
