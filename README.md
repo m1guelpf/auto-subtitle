@@ -55,6 +55,10 @@ Follow thsese instructions only if your gpu is powerful enough to be worth switc
     - pip cache purge
     
     - pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+
+    or for python 3.11
+
+    - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
     
     Having a decent gpu can drammatically increase the performance
     
