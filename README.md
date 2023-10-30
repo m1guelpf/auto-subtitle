@@ -30,7 +30,7 @@
 To get started, you'll need Python 3.7 or newer. Install the binary by running the following command:
 
 ```bash
-    pip install git+https://github.com/Sectumsempra82/auto-subtitle-plus.gi
+    pip install git+https://github.com/Sectumsempra82/auto-subtitle-plus.git
 ```
 
 You'll also need to install [`ffmpeg`](https://ffmpeg.org/), which is available from most package managers:
