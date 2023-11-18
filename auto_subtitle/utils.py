@@ -2,17 +2,6 @@ import os
 from typing import Iterator, TextIO
 
 
-def str2bool(string):
-    string = string.lower()
-    str2val = {"true": True, "false": False}
-
-    if string in str2val:
-        return str2val[string]
-    else:
-        raise ValueError(
-            f"Expected one of {set(str2val.keys())}, got {string}")
-
-
 def format_timestamp(seconds: float, always_include_hours: bool = False):
     assert seconds >= 0, "non-negative timestamp expected"
     milliseconds = round(seconds * 1000.0)

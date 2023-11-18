@@ -4,7 +4,7 @@ import whisper
 import argparse
 import warnings
 import tempfile
-from .utils import filename, str2bool, write_srt
+from .utils import filename, write_srt
 
 
 def main():
@@ -16,12 +16,12 @@ def main():
                         choices=whisper.available_models(), help="name of the Whisper model to use")
     parser.add_argument("--output_dir", "-o", type=str,
                         default=".", help="directory to save the outputs")
-    parser.add_argument("--output_srt", type=str2bool, default=False,
-                        help="whether to output the .srt file along with the video files")
-    parser.add_argument("--srt_only", type=str2bool, default=False,
+    parser.add_argument("--output_srt", action="store_true",
+                        help="output the .srt file along with the video files")
+    parser.add_argument("--srt_only", action="store_true",
                         help="only generate the .srt file and not create overlayed video")
-    parser.add_argument("--verbose", type=str2bool, default=False,
-                        help="whether to print out the progress and debug messages")
+    parser.add_argument("--verbose", action="store_true",
+                        help="print out the progress and debug messages")
 
     parser.add_argument("--task", type=str, default="transcribe", choices=[
                         "transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
@@ -94,7 +94,7 @@ def get_subtitles(audio_paths: list, output_srt: bool, output_dir: str, transcri
     for path, audio_path in audio_paths.items():
         srt_path = output_dir if output_srt else tempfile.gettempdir()
         srt_path = os.path.join(srt_path, f"{filename(path)}.srt")
-        
+
         print(
             f"Generating subtitles for {filename(path)}... This might take a while."
         )
