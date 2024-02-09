@@ -39,6 +39,18 @@ Run the following to view all available options:
 
     auto_subtitle --help
 
+## Translate subtitle using DeepL API
+
+For translation features, you must set the DEEPL_AUTH_KEY environment variable with your DeepL API authentication key:
+
+    export DEEPL_AUTH_KEY='your_deepl_auth_key_here'
+
+Add this line to your .bashrc, .zshrc, or equivalent shell configuration file to make the setting persistent.
+
+To translate the subtitles into another language using DeepL API, use the --translate_subtitles flag and specify the target language with --translation_language:
+
+    auto_subtitle /path/to/video.mp4 --translate_subtitles True --translation_language zh
+
 ## License
 
 This script is open-source and licensed under the MIT License. For more details, check the [LICENSE](LICENSE) file.
