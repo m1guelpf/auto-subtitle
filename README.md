@@ -20,7 +20,10 @@ brew install ffmpeg
 # on Windows using Chocolatey (https://chocolatey.org/)
 choco install ffmpeg
 ```
-
+It also seems to require python-ffmpeg
+```bash
+pip3 install python-ffmpeg
+```
 ## Usage
 
 The following command will generate a `subtitled/video.mp4` file contained the input video with overlayed subtitles.
