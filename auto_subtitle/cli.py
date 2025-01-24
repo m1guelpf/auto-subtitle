@@ -1,10 +1,11 @@
 import os
 import ffmpeg
 import whisper
+from whisper.utils import get_writer
 import argparse
 import warnings
 import tempfile
-from .utils import filename, str2bool, write_srt
+from utils import filename, str2bool, write_srt
 
 
 def main():
@@ -48,7 +49,7 @@ def main():
     model = whisper.load_model(model_name)
     audios = get_audio(args.pop("video"))
     subtitles = get_subtitles(
-        audios, output_srt or srt_only, output_dir, lambda audio_path: model.transcribe(audio_path, **args)
+        audios, output_srt or srt_only, output_dir, model.transcribe
     )
 
     if srt_only:
@@ -61,9 +62,9 @@ def main():
 
         video = ffmpeg.input(path)
         audio = video.audio
-
+        sr_pa = "/Users/surajtripathi/repo/personal/auto-subtitle/18509290e2cba14fe63aa538589333a7cf0a0322efba4eb7ee133c44ae78fb0.srt"
         ffmpeg.concat(
-            video.filter('subtitles', srt_path, force_style="OutlineColour=&H40000000,BorderStyle=3"), audio, v=1, a=1
+            video.filter('subtitles', sr_pa, force_style="OutlineColour=&H40000000,BorderStyle=3"), audio, v=1, a=1
         ).output(out_path).run(quiet=True, overwrite_output=True)
 
         print(f"Saved subtitled video to {os.path.abspath(out_path)}.")
@@ -81,7 +82,7 @@ def get_audio(paths):
         ffmpeg.input(path).output(
             output_path,
             acodec="pcm_s16le", ac=1, ar="16k"
-        ).run(quiet=True, overwrite_output=True)
+        ).run(overwrite_output=True)
 
         audio_paths[path] = output_path
 
@@ -92,20 +93,25 @@ def get_subtitles(audio_paths: list, output_srt: bool, output_dir: str, transcri
     subtitles_path = {}
 
     for path, audio_path in audio_paths.items():
-        srt_path = output_dir if output_srt else tempfile.gettempdir()
+        srt_path = output_dir if output_srt else output_dir
         srt_path = os.path.join(srt_path, f"{filename(path)}.srt")
         
         print(
             f"Generating subtitles for {filename(path)}... This might take a while."
         )
 
+        print(f"Output {srt_path}")
+
         warnings.filterwarnings("ignore")
-        result = transcribe(audio_path)
+        result = transcribe(audio_path, initial_prompt="prompt", word_timestamps=True)
         warnings.filterwarnings("default")
-
-        with open(srt_path, "w", encoding="utf-8") as srt:
-            write_srt(result["segments"], file=srt)
-
+        word_options = {
+          "highlight_words": False,
+          "max_line_count": 1,
+          "max_line_width": 1
+        }
+        srt_writer = get_writer("srt", output_dir)
+        srt_writer(result, srt_path, word_options)
         subtitles_path[path] = srt_path
 
     return subtitles_path
