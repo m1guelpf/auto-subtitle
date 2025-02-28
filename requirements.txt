@@ -1,1 +1,3 @@
 openai-whisper
+ffmpeg-python
+numpy<2.0.0

@@ -8,6 +8,8 @@ setup(
     author="Miguel Piedrafita",
     install_requires=[
         'openai-whisper',
+        'ffmpeg-python',
+        'numpy<2.0.0'
     ],
     description="Automatically generate and embed subtitles into your videos",
     entry_points={

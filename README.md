@@ -1,12 +1,16 @@
 # Automatic subtitles in your videos
 
+This is a fork of [auto_subtitle](https://github.com/m1guelpf/auto-subtitle) developed by [m1guelpf](https://github.com/m1guelpf). The main difference in `AutoSubZ` is the addition of several features, such as .vtt and .txt output, along with fixes for various bugs.
+
+
+
 This repository uses `ffmpeg` and [OpenAI's Whisper](https://openai.com/blog/whisper) to automatically generate and overlay subtitles on any video.
 
 ## Installation
 
-To get started, you'll need Python 3.7 or newer. Install the binary by running the following command:
+To get started, you'll need Python 3.8 or newer. Install the binary by running the following command:
 
-    pip install git+https://github.com/m1guelpf/auto-subtitle.git
+    pip install git+https://github.com/zaltinsoy/AutoSubZ.git
 
 You'll also need to install [`ffmpeg`](https://ffmpeg.org/), which is available from most package managers:
 
@@ -17,8 +21,9 @@ sudo apt update && sudo apt install ffmpeg
 # on MacOS using Homebrew (https://brew.sh/)
 brew install ffmpeg
 
-# on Windows using Chocolatey (https://chocolatey.org/)
-choco install ffmpeg
+# on Windows using Winget
+winget install -e --id Gyan.FFmpeg
+
 ```
 
 ## Usage
