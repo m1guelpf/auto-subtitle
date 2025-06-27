@@ -1,0 +1,15 @@
+# Web application dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+redis>=5.0.0
+celery>=5.3.0
+pydantic>=2.5.0
+
+# Optional for production
+gunicorn>=21.2.0
+httpx>=0.25.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

@@ -1,0 +1,56 @@
+name: visub
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: visub-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # For production, add these services:
+  backend:
+    build: .
+    container_name: visub-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://visub-redis:6379/0
+      - UPLOAD_DIR=/app/uploads
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - production
+
+  celery:
+    build: .
+    container_name: visub-celery-worker
+    command: celery -A webapp.celery worker --loglevel=info
+    environment:
+      - REDIS_URL=redis://visub-redis:6379/0
+      - UPLOAD_DIR=/app/uploads
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  redis_data:

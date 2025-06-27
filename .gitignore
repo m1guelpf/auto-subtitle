@@ -1,5 +1,105 @@
-dist
+# Build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
-*.egg-info
-auto_subtitle/__pycache__
-build
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Media files
+*.mp4
+*.mp3
+*.m4a
+*.wav
+*.webm
+*.avi
+*.mov
+*.mkv
+*.flv
+
+# Subtitle files
+*.ass
+*.srt
+*.vtt
+
+# Temporary files
+tmp/
+temp/
+out/
+output/
+
+# Upload directories
+uploads/
+/tmp/visub_uploads/
+
+# Logs
+*.log
+logs/
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnpm-debug.log*
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.production.local
+frontend/.env.staging.local
+
+# Python cache
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Redis dumps
+dump.rdb
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Test files
+test_videos/
+test_audio/
