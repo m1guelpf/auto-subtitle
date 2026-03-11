@@ -21,6 +21,12 @@ brew install ffmpeg
 choco install ffmpeg
 ```
 
+and FFmpeg's [Python bindings](https://github.com/kkroening/ffmpeg-python):
+
+```bash
+pip install ffmpeg-python
+```
+
 ## Usage
 
 The following command will generate a `subtitled/video.mp4` file contained the input video with overlayed subtitles.
